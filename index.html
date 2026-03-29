@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HIVE DEVS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+  <div class="hex-grid-overlay"></div>
+
+  <!-- ══════════════ NAVBAR ══════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="logo-hex">
+          <svg viewBox="0 0 60 52" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="30,2 58,17 58,35 30,50 2,35 2,17" fill="none" stroke="#FFD600" stroke-width="2.5"/>
+            <polygon points="30,10 50,21 50,31 30,42 10,31 10,21" fill="#FFD600" opacity="0.15"/>
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFD600" font-family="Orbitron" font-size="13" font-weight="900">HD</text>
+          </svg>
+        </div>
+        <span class="logo-text">HIVE<span class="logo-accent">DEVS</span></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+  <li><a href="#features">Recursos</a></li>
+  <li><a href="#team">Time</a></li>
+
+  <!-- NOVOS BOTÕES -->
+  <li><a href="curso.html">Curso</a></li>
+  <li><a href="codigos.html">Open Code</a></li>
+
+  <li id="nav-auth-area">
+    <button class="nav-cta-btn" id="btn-nav-login">Entrar</button>
+  </li>
+</ul>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ══════════════ HERO ══════════════ -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>Sistema Online — v2.0.26</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="title-line">HIVE</span>
+        <span class="title-line accent">DEVS</span>
+      </h1>
+      <p class="hero-sub">
+        <span class="mono">&gt;&gt;</span> Construindo o futuro, <br/>linha por linha.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" id="btn-about">
+          <span class="btn-hex"></span>
+          O que é HIVE DEVS?
+        </button>
+        <button class="btn-secondary" id="btn-hero-join">
+          Fazer parte
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num" id="stat-devs">–</span>
+          <span class="stat-label">Devs Ativos</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="47">0</span>
+          <span class="stat-label">Projetos</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="12">0</span>
+          <span class="stat-label">Tecnologias</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hex-cluster" id="hexCluster"></div>
+    </div>
+    <div class="scroll-hint">
+      <span class="mono">scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ MODAL: O QUE É HIVE DEVS ══════════════ -->
+  <div class="modal-overlay" id="modal-about">
+    <div class="modal-box">
+      <button class="modal-close" data-close="modal-about">&times;</button>
+      <div class="modal-header">
+        <svg viewBox="0 0 60 52" class="modal-logo" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="30,2 58,17 58,35 30,50 2,35 2,17" fill="none" stroke="#FFD600" stroke-width="2.5"/>
+          <polygon points="30,10 50,21 50,31 30,42 10,31 10,21" fill="#FFD600" opacity="0.2"/>
+          <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFD600" font-family="Orbitron" font-size="13" font-weight="900">HD</text>
+        </svg>
+        <h2>O que é <span class="accent">HIVE DEVS?</span></h2>
+      </div>
+      <p class="modal-desc">Comunidade e equipe de desenvolvedores com concentração na inovação.</p>
+      <div class="modal-tags">
+        <span>#inovação</span><span>#tecnologia</span><span>#comunidade</span><span>#código</span>
+      </div>
+      <div class="modal-creator">
+        <span class="mono">&gt; Criado por</span>
+        <strong>João Antonio</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODAL: AUTH ══════════════ -->
+  <div class="modal-overlay" id="modal-auth">
+    <div class="modal-box auth-box">
+      <button class="modal-close" data-close="modal-auth">&times;</button>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Entrar</button>
+        <button class="auth-tab" data-tab="register">Criar conta</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-panel" id="panel-login">
+        <div class="auth-icon">
+          <svg viewBox="0 0 60 52" xmlns="http://www.w3.org/2000/svg" width="52" height="45">
+            <polygon points="30,2 58,17 58,35 30,50 2,35 2,17" fill="rgba(255,214,0,0.08)" stroke="#FFD600" stroke-width="2"/>
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFD600" font-family="Orbitron" font-size="12" font-weight="900">HD</text>
+          </svg>
+        </div>
+        <h3>Bem-vindo de volta</h3>
+        <p class="auth-sub">Acesse sua conta HIVE DEVS</p>
+        <div class="form-group">
+          <label class="mono">// email</label>
+          <input type="email" id="login-email" placeholder="dev@hive.com" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="mono">// senha</label>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+        <div class="auth-error" id="login-error"></div>
+        <button class="btn-primary btn-full" id="btn-do-login">
+          <span class="btn-hex"></span>
+          <span id="login-btn-txt">Entrar na colmeia</span>
+        </button>
+        <p class="auth-switch">Não tem conta? <button class="link-btn" data-tab="register">Criar agora</button></p>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-panel hidden" id="panel-register">
+        <div class="auth-icon">
+          <svg viewBox="0 0 60 52" xmlns="http://www.w3.org/2000/svg" width="52" height="45">
+            <polygon points="30,2 58,17 58,35 30,50 2,35 2,17" fill="rgba(255,214,0,0.08)" stroke="#FFD600" stroke-width="2"/>
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFD600" font-family="Orbitron" font-size="12" font-weight="900">HD</text>
+          </svg>
+        </div>
+        <h3>Entre para a colmeia</h3>
+        <p class="auth-sub">Crie sua conta gratuitamente</p>
+        <div class="form-group">
+          <label class="mono">// usuário</label>
+          <input type="text" id="reg-username" placeholder="seu_username" autocomplete="username"/>
+        </div>
+        <div class="form-group">
+          <label class="mono">// email</label>
+          <input type="email" id="reg-email" placeholder="dev@hive.com" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="mono">// senha</label>
+          <input type="password" id="reg-pass" placeholder="mín. 6 caracteres" autocomplete="new-password"/>
+        </div>
+        <div class="auth-error" id="reg-error"></div>
+        <button class="btn-primary btn-full" id="btn-do-register">
+          <span class="btn-hex"></span>
+          <span id="reg-btn-txt">Criar conta</span>
+        </button>
+        <p class="auth-switch">Já tem conta? <button class="link-btn" data-tab="login">Entrar</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODAL: PERFIL ══════════════ -->
+  <div class="modal-overlay" id="modal-profile">
+    <div class="modal-box profile-box">
+      <button class="modal-close" data-close="modal-profile">&times;</button>
+      <div class="profile-header">
+        <div class="profile-hex-wrap">
+          <svg viewBox="0 0 120 104" xmlns="http://www.w3.org/2000/svg" width="96" height="84">
+            <polygon points="60,4 116,34 116,70 60,100 4,70 4,34" fill="#1A1A1A" stroke="#FFD600" stroke-width="2.5"/>
+            <text id="profile-initials" x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" fill="#FFD600" font-family="Orbitron" font-size="26" font-weight="900">??</text>
+          </svg>
+        </div>
+        <div class="profile-identity">
+          <div class="mono profile-tag">&gt; dev ativo</div>
+          <h3 id="profile-username">–</h3>
+          <p class="profile-email mono" id="profile-email">–</p>
+        </div>
+      </div>
+      <div class="profile-info-grid">
+        <div class="profile-row">
+          <span class="mono">membro desde</span>
+          <strong id="profile-since">–</strong>
+        </div>
+        <div class="profile-row">
+          <span class="mono">status</span>
+          <strong style="color:var(--yellow)">● Online</strong>
+        </div>
+      </div>
+      <button class="btn-logout" id="btn-logout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Sair da conta
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════ FEATURES ══════════════ -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <span class="section-tag mono">&lt;features /&gt;</span>
+      <h2>Por que <span class="accent">HIVE DEVS?</span></h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card" data-anim>
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><polygon points="20,2 38,12 38,28 20,38 2,28 2,12" fill="#FFD600" opacity="0.1" stroke="#FFD600" stroke-width="1.5"/><path d="M13 20l4 4 10-10" stroke="#FFD600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Colaboração Real</h3>
+        <p>Trabalhe em projetos reais com devs de todo o Brasil. Código aberto, aprendizado mútuo.</p>
+      </div>
+      <div class="feature-card" data-anim>
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><polygon points="20,2 38,12 38,28 20,38 2,28 2,12" fill="#FFD600" opacity="0.1" stroke="#FFD600" stroke-width="1.5"/><circle cx="20" cy="20" r="5" stroke="#FFD600" stroke-width="2"/><path d="M20 10v4M20 26v4M10 20h4M26 20h4" stroke="#FFD600" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Inovação Contínua</h3>
+        <p>Foco em tecnologias emergentes, IA, Web3 e muito mais. Sempre na vanguarda.</p>
+      </div>
+      <div class="feature-card" data-anim>
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><polygon points="20,2 38,12 38,28 20,38 2,28 2,12" fill="#FFD600" opacity="0.1" stroke="#FFD600" stroke-width="1.5"/><path d="M14 28V18M20 28V12M26 28V22" stroke="#FFD600" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Crescimento de Carreira</h3>
+        <p>Mentoria, networking e oportunidades reais. Do junior ao sênior, todos evoluem.</p>
+      </div>
+      <div class="feature-card" data-anim>
+        <div class="card-icon">
+          <svg viewBox="0 0 40 40" fill="none"><polygon points="20,2 38,12 38,28 20,38 2,28 2,12" fill="#FFD600" opacity="0.1" stroke="#FFD600" stroke-width="1.5"/><path d="M15 20h10M15 15l5-5 5 5M20 25v-10" stroke="#FFD600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Open Source First</h3>
+        <p>Tudo que construímos vive no GitHub. Contribuições são bem-vindas e valorizadas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ TEAM ══════════════ -->
+  <section class="team" id="team">
+    <div class="section-header">
+      <span class="section-tag mono">&lt;team /&gt;</span>
+      <h2>O <span class="accent">Time</span></h2>
+    </div>
+    <div class="team-founder">
+      <div class="founder-hex">
+        <svg viewBox="0 0 120 104" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="60,4 116,34 116,70 60,100 4,70 4,34" fill="#111" stroke="#FFD600" stroke-width="2"/>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#FFD600" font-family="Orbitron" font-size="32" font-weight="900">JA</text>
+        </svg>
+      </div>
+      <div class="founder-info">
+        <div class="founder-role mono">&gt; Fundador &amp; CEO</div>
+        <h3>João Antonio</h3>
+        <p>Desenvolvedor e visionário por trás da HIVE DEVS. Apaixonado por construir comunidades que transformam código em impacto real.</p>
+        <div class="founder-tags">
+          <span>Full-Stack</span><span>Arquitetura</span><span>Comunidade</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-text">HIVE<span class="logo-accent">DEVS</span></span>
+        <p>Comunidade e equipe de desenvolvedores com concentração na inovação.</p>
+      </div>
+      <div class="footer-credit">
+        <span class="mono">// Criado por <strong>João Antonio</strong></span>
+        <span class="mono">© <span id="year"></span> HIVE DEVS</span>
+      </div>
+    </div>
+    <div class="footer-hex-row">
+      <svg viewBox="0 0 300 30" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <polygon points="15,2 28,10 28,20 15,28 2,20 2,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="45,2 58,10 58,20 45,28 32,20 32,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="75,2 88,10 88,20 75,28 62,20 62,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="105,2 118,10 118,20 105,28 92,20 92,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="135,2 148,10 148,20 135,28 122,20 122,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="165,2 178,10 178,20 165,28 152,20 152,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="195,2 208,10 208,20 195,28 182,20 182,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="225,2 238,10 238,20 225,28 212,20 212,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="255,2 268,10 268,20 255,28 242,20 242,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+        <polygon points="285,2 298,10 298,20 285,28 272,20 272,10" fill="none" stroke="#FFD600" stroke-width="0.5" opacity="0.3"/>
+      </svg>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIVE DEVS — Open Code</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--black:#0A0A0A;--black-3:#1A1A1A;
+--yellow:#FFD600;--white:#F0F0F0;--grey:#888;
+--font-display:'Orbitron',sans-serif;
+--font-mono:'Share Tech Mono',monospace;
+--font-body:'Rajdhani',sans-serif;
+}
+body{background:var(--black);color:var(--white);font-family:var(--font-body)}
+
+.nav{display:flex;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid rgba(255,214,0,.1)}
+.logo{font-family:var(--font-display);font-weight:900}
+.logo span{color:var(--yellow)}
+.btn{border:1px solid var(--yellow);color:var(--yellow);padding:.4rem 1rem;text-decoration:none;font-family:var(--font-mono)}
+
+.container{max-width:1100px;margin:auto;padding:2rem}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+.card{
+background:var(--black-3);
+padding:1.5rem;
+border:1px solid #222;
+cursor:pointer;
+transition:.2s;
+}
+.card:hover{border-color:var(--yellow);box-shadow:0 0 10px rgba(255,214,0,.2)}
+
+.title{font-family:var(--font-display);margin-bottom:.5rem}
+.meta{font-family:var(--font-mono);font-size:.75rem;color:var(--grey)}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center}
+.modal-box{background:#111;padding:2rem;max-width:700px;width:100%;border:1px solid rgba(255,214,0,.2)}
+pre{background:#000;padding:1rem;overflow:auto;color:#0f0}
+.close{cursor:pointer;float:right}
+
+/* FORM */
+.form{margin-bottom:2rem;border:1px solid rgba(255,214,0,.2);padding:1rem}
+input,textarea{
+width:100%;margin:.5rem 0;padding:.6rem;background:#111;border:1px solid #333;color:#fff
+}
+button{padding:.6rem;background:var(--yellow);border:none;font-weight:bold;cursor:pointer}
+
+</style>
+</head>
+<body>
+
+<div class="nav">
+<div class="logo">HIVE<span>DEVS</span></div>
+<a href="index.html" class="btn">Voltar</a>
+</div>
+
+<div class="container">
+
+<h1 style="font-family:var(--font-display);margin-bottom:1rem">Open Code</h1>
+
+<!-- FORM -->
+<div class="form">
+<input id="name" placeholder="Nome do código">
+<input id="lang" placeholder="Linguagem">
+<input id="author" placeholder="Seu nome">
+<textarea id="code" placeholder="Cole seu código aqui"></textarea>
+<button onclick="publish()">Publicar</button>
+</div>
+
+<!-- LIST -->
+<div class="grid" id="list"></div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+<div class="modal-box">
+<span class="close" onclick="closeModal()">✕</span>
+<h2 id="m-title"></h2>
+<p id="m-meta"></p>
+<pre id="m-code"></pre>
+</div>
+</div>
+
+<script>
+const DB='https://codigo-44625-default-rtdb.firebaseio.com';
+
+function genId(){return Date.now()+Math.random().toString(36).slice(2)}
+
+async function publish(){
+const name=document.getElementById('name').value;
+const lang=document.getElementById('lang').value;
+const author=document.getElementById('author').value;
+const code=document.getElementById('code').value;
+
+if(!name||!lang||!author||!code)return alert('Preencha tudo');
+
+const id=genId();
+
+// estrutura leve
+await fetch(`${DB}/codes/${id}.json`,{
+method:'PUT',
+body:JSON.stringify({
+name,lang,author,code,
+createdAt:Date.now()
+})
+});
+
+load();
+}
+
+async function load(){
+const res=await fetch(`${DB}/codes.json`);
+const data=await res.json();
+
+const list=document.getElementById('list');
+list.innerHTML='';
+
+if(!data)return;
+
+Object.entries(data).reverse().forEach(([id,c])=>{
+const div=document.createElement('div');
+div.className='card';
+div.innerHTML=`
+<div class="title">${c.name}</div>
+<div class="meta">${c.lang} • por ${c.author}</div>
+`;
+
+div.onclick=()=>openModal(c);
+list.appendChild(div);
+});
+}
+
+function openModal(c){
+document.getElementById('modal').style.display='flex';
+document.getElementById('m-title').textContent=c.name;
+document.getElementById('m-meta').textContent=c.lang+' • '+c.author;
+document.getElementById('m-code').textContent=c.code;
+}
+
+function closeModal(){document.getElementById('modal').style.display='none'}
+
+load();
+
+</script>
+
+</body>
+</html>

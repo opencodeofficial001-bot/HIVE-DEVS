@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIVE DEVS — Cursos</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--black:#0A0A0A;--black-3:#1A1A1A;
+--yellow:#FFD600;--white:#F0F0F0;--grey:#888;
+--font-display:'Orbitron',sans-serif;
+--font-mono:'Share Tech Mono',monospace;
+--font-body:'Rajdhani',sans-serif;
+}
+body{background:var(--black);color:var(--white);font-family:var(--font-body)}
+
+.nav{display:flex;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid rgba(255,214,0,.1)}
+.logo{font-family:var(--font-display);font-weight:900}
+.logo span{color:var(--yellow)}
+.btn{border:1px solid var(--yellow);color:var(--yellow);padding:.4rem 1rem;text-decoration:none;font-family:var(--font-mono)}
+
+.container{padding:2rem;max-width:1100px;margin:auto}
+.hidden{display:none}
+
+.login-box{max-width:400px;margin:5rem auto;text-align:center;border:1px solid rgba(255,214,0,.2);padding:2rem}
+input{width:100%;margin:.5rem 0;padding:.6rem;background:#111;border:1px solid #333;color:#fff}
+button{width:100%;padding:.7rem;background:var(--yellow);border:none;font-weight:bold;cursor:pointer}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+.card{background:var(--black-3);padding:1.5rem;border:1px solid #222}
+.progress{height:6px;background:#222;margin-top:1rem}
+.progress-bar{height:100%;background:var(--yellow);width:0%}
+
+.player{position:fixed;inset:0;background:#000;display:none;flex-direction:column}
+.player video{width:100%;height:100%;object-fit:cover}
+.close{position:absolute;top:20px;right:20px;color:#fff;font-size:20px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="nav">
+<div class="logo">HIVE<span>DEVS</span></div>
+<a href="index.html" class="btn">Voltar</a>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="login-box">
+<h2>Login obrigatório</h2>
+<input id="email" placeholder="email">
+<input id="pass" type="password" placeholder="senha">
+<button onclick="login()">Entrar</button>
+</div>
+
+<!-- COURSES -->
+<div id="courses" class="container hidden">
+<h1>Cursos</h1>
+<div class="grid">
+
+<div class="card">
+<h3>Curso JS Básico</h3>
+<p>Aprenda JavaScript do zero</p>
+<button onclick="openPlayer()">Assistir</button>
+<div class="progress"><div class="progress-bar" id="p1"></div></div>
+</div>
+
+</div>
+</div>
+
+<!-- PLAYER -->
+<div class="player" id="player">
+<span class="close" onclick="closePlayer()">✕</span>
+<video id="video" controls>
+<source src="https://www.w3schools.com/html/mov_bbb.mp4">
+</video>
+</div>
+
+<script>
+const DB='https://hive-14e4f-default-rtdb.firebaseio.com';
+
+function sanitizeKey(str){return str.replace(/[.#$\[\]/]/g,'_')}
+
+async function dbGet(path){
+const res=await fetch(`${DB}/${path}.json`);
+return res.json();
+}
+
+async function dbSet(path,data){
+await fetch(`${DB}/${path}.json`,{
+method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)
+});
+}
+
+// LOGIN REAL (igual seu sistema)
+async function sha256(str){
+const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function login(){
+const email=document.getElementById('email').value.trim().toLowerCase();
+const pass=document.getElementById('pass').value;
+
+if(!email||!pass)return alert('Preencha tudo');
+
+const user=await dbGet('users/'+sanitizeKey(email));
+if(!user)return alert('Email não encontrado');
+
+const hash=await sha256(pass+email);
+if(hash!==user.passHash)return alert('Senha incorreta');
+
+localStorage.setItem('session',JSON.stringify(user));
+showCourses();
+}
+
+function showCourses(){
+document.getElementById('login').classList.add('hidden');
+document.getElementById('courses').classList.remove('hidden');
+}
+
+// RESTORE SESSION
+const session=JSON.parse(localStorage.getItem('session'));
+if(session)showCourses();
+
+// PLAYER
+function openPlayer(){document.getElementById('player').style.display='flex'}
+function closePlayer(){document.getElementById('player').style.display='none'}
+
+// PROGRESS SALVO NO FIREBASE
+const video=document.getElementById('video');
+video.addEventListener('timeupdate',async ()=>{
+if(!session)return;
+const percent=(video.currentTime/video.duration)*100;
+document.getElementById('p1').style.width=percent+'%';
+
+await dbSet(`progress/${session.uid}/curso1`,{progress:percent});
+});
+
+// LOAD PROGRESS
+window.onload=async ()=>{
+if(!session)return;
+const data=await dbGet(`progress/${session.uid}/curso1`);
+if(data){
+document.getElementById('p1').style.width=data.progress+'%';
+}
+}
+
+</script>
+
+</body>
+</html>
