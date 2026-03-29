@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HIVE DEVS — Cursos</title>
-<link https://youtu.be/YqSfq1LiGvw?si=D2Y3X1nKynp123bk>
+
+<!-- FONTES -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -20,7 +22,7 @@ body{background:var(--black);color:var(--white);font-family:var(--font-body)}
 .nav{display:flex;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid rgba(255,214,0,.1)}
 .logo{font-family:var(--font-display);font-weight:900}
 .logo span{color:var(--yellow)}
-.btn{border:1px solid var(--yellow);color:var(--yellow);padding:.4rem 1rem;text-decoration:none;font-family:var(--font-mono)}
+.btn{border:1px solid var(--yellow);color:var(--yellow);padding:.4rem 1rem;text-decoration:none;font-family:var(--font-mono);cursor:pointer}
 
 .container{padding:2rem;max-width:1100px;margin:auto}
 .hidden{display:none}
@@ -35,15 +37,15 @@ button{width:100%;padding:.7rem;background:var(--yellow);border:none;font-weight
 .progress-bar{height:100%;background:var(--yellow);width:0%}
 
 .player{position:fixed;inset:0;background:#000;display:none;flex-direction:column}
-.player video{width:100%;height:100%;object-fit:cover}
-.close{position:absolute;top:20px;right:20px;color:#fff;font-size:20px;cursor:pointer}
+iframe{width:100%;height:100%}
+.close{position:absolute;top:20px;right:20px;color:#fff;font-size:20px;cursor:pointer;z-index:10}
 </style>
 </head>
 <body>
 
 <div class="nav">
 <div class="logo">HIVE<span>DEVS</span></div>
-<a href="index.html" class="btn">Voltar</a>
+<div class="btn" onclick="logout()">Sair</div>
 </div>
 
 <!-- LOGIN -->
@@ -62,7 +64,7 @@ button{width:100%;padding:.7rem;background:var(--yellow);border:none;font-weight
 <div class="card">
 <h3>Curso JS Básico</h3>
 <p>Aprenda JavaScript do zero</p>
-<button onclick="openPlayer()">Assistir</button>
+<button onclick="openPlayer('YqSfq1LiGvw')">Assistir</button>
 <div class="progress"><div class="progress-bar" id="p1"></div></div>
 </div>
 
@@ -72,18 +74,15 @@ button{width:100%;padding:.7rem;background:var(--yellow);border:none;font-weight
 <!-- PLAYER -->
 <div class="player" id="player">
 <span class="close" onclick="closePlayer()">✕</span>
-
-<iframe id="ytplayer"
-width="100%" height="100%"
-src="https://www.youtube.com/embed/YqSfq1LiGvw"
-frameborder="0"
-allowfullscreen>
-</iframe>
-
+<div id="yt"></div>
 </div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 const DB='https://hive-14e4f-default-rtdb.firebaseio.com';
+let player;
+let currentCourse = 'curso1';
 
 function sanitizeKey(str){return str.replace(/[.#$\[\]/]/g,'_')}
 
@@ -98,7 +97,6 @@ method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(dat
 });
 }
 
-// LOGIN REAL (igual seu sistema)
 async function sha256(str){
 const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
 return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -120,35 +118,65 @@ localStorage.setItem('session',JSON.stringify(user));
 showCourses();
 }
 
+function logout(){
+localStorage.removeItem('session');
+location.reload();
+}
+
 function showCourses(){
 document.getElementById('login').classList.add('hidden');
 document.getElementById('courses').classList.remove('hidden');
+loadProgress();
 }
 
-// RESTORE SESSION
 const session=JSON.parse(localStorage.getItem('session'));
 if(session)showCourses();
 
-// PLAYER
-function openPlayer(){document.getElementById('player').style.display='flex'}
-function closePlayer(){document.getElementById('player').style.display='none'}
+// YOUTUBE PLAYER API
+function onYouTubeIframeAPIReady(){ }
 
-// PROGRESS SALVO NO FIREBASE
-const video=document.getElementById('video');
-video.addEventListener('timeupdate',async ()=>{
-if(!session)return;
-const percent=(video.currentTime/video.duration)*100;
-document.getElementById('p1').style.width=percent+'%';
+function openPlayer(videoId){
+document.getElementById('player').style.display='flex';
 
-await dbSet(`progress/${session.uid}/curso1`,{progress:percent});
+player = new YT.Player('yt',{
+videoId: videoId,
+events:{
+'onReady': onPlayerReady
+}
 });
+}
 
-// LOAD PROGRESS
-window.onload=async ()=>{
-if(!session)return;
-const data=await dbGet(`progress/${session.uid}/curso1`);
+function closePlayer(){
+document.getElementById('player').style.display='none';
+if(player) player.destroy();
+}
+
+function onPlayerReady(){
+setInterval(async ()=>{
+if(!player || !session) return;
+
+const current = player.getCurrentTime();
+const duration = player.getDuration();
+
+if(duration > 0){
+const percent = (current/duration)*100;
+
+document.getElementById('p1').style.width = percent + '%';
+
+await dbSet(`progress/${session.uid}/${currentCourse}`,{
+progress: percent
+});
+}
+
+}, 3000);
+}
+
+async function loadProgress(){
+if(!session) return;
+
+const data = await dbGet(`progress/${session.uid}/${currentCourse}`);
 if(data){
-document.getElementById('p1').style.width=data.progress+'%';
+document.getElementById('p1').style.width = data.progress + '%';
 }
 }
 
