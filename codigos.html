@@ -38,33 +38,58 @@ transition:.2s;
 .title{font-family:var(--font-display);margin-bottom:.5rem}
 .meta{font-family:var(--font-mono);font-size:.75rem;color:var(--grey)}
 
-/* MODAL */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center}
-.modal-box{background:#111;padding:2rem;max-width:700px;width:100%;border:1px solid rgba(255,214,0,.2)}
-pre{background:#000;padding:1rem;overflow:auto;color:#0f0}
-.close{cursor:pointer;float:right}
-
-/* FORM */
 .form{margin-bottom:2rem;border:1px solid rgba(255,214,0,.2);padding:1rem}
+
 input,textarea{
 width:100%;margin:.5rem 0;padding:.6rem;background:#111;border:1px solid #333;color:#fff
 }
-button{padding:.6rem;background:var(--yellow);border:none;font-weight:bold;cursor:pointer}
 
+button{padding:.6rem;background:var(--yellow);border:none;font-weight:bold;cursor:pointer;margin-top:.5rem}
+
+/* MODAL */
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.85);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.modal-box{
+background:#111;
+padding:2rem;
+max-width:800px;
+width:100%;
+border:1px solid rgba(255,214,0,.2);
+max-height:80vh;
+overflow:auto;
+}
+
+pre{
+background:#000;
+padding:1rem;
+overflow:auto;
+color:#0f0;
+white-space:pre-wrap;
+}
+
+.close{cursor:pointer;float:right;font-size:18px}
+
+.loader{text-align:center;color:#888;margin-top:2rem}
 </style>
 </head>
 <body>
 
 <div class="nav">
 <div class="logo">HIVE<span>DEVS</span></div>
-<a href="index.html" class="btn">Voltar</a>
+<a href="#" class="btn">Voltar</a>
 </div>
 
 <div class="container">
 
 <h1 style="font-family:var(--font-display);margin-bottom:1rem">Open Code</h1>
 
-<!-- FORM -->
 <div class="form">
 <input id="name" placeholder="Nome do código">
 <input id="lang" placeholder="Linguagem">
@@ -73,17 +98,23 @@ button{padding:.6rem;background:var(--yellow);border:none;font-weight:bold;curso
 <button onclick="publish()">Publicar</button>
 </div>
 
-<!-- LIST -->
+<input id="search" placeholder="Buscar por linguagem..." oninput="filterList()">
+
 <div class="grid" id="list"></div>
+<div id="loading" class="loader">Carregando...</div>
 
 </div>
 
 <!-- MODAL -->
-<div class="modal" id="modal">
+<div class="modal" id="modal" onclick="outsideClick(event)">
 <div class="modal-box">
 <span class="close" onclick="closeModal()">✕</span>
 <h2 id="m-title"></h2>
 <p id="m-meta"></p>
+
+<button onclick="copyCode()">📋 Copiar código</button>
+<button id="deleteBtn" onclick="deleteCode()" style="display:none;background:red;color:#fff">🗑️ Deletar</button>
+
 <pre id="m-code"></pre>
 </div>
 </div>
@@ -91,45 +122,91 @@ button{padding:.6rem;background:var(--yellow);border:none;font-weight:bold;curso
 <script>
 const DB='https://codigo-44625-default-rtdb.firebaseio.com';
 
-function genId(){return Date.now()+Math.random().toString(36).slice(2)}
+let allCodes = [];
+let currentCode = null;
 
+// ID
+function genId(){
+return Date.now()+Math.random().toString(36).slice(2)
+}
+
+// SAFE HTML
+function escapeHTML(str){
+return str.replace(/[&<>"']/g, function(tag){
+const chars = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+return chars[tag] || tag;
+});
+}
+
+// PUBLICAR
 async function publish(){
-const name=document.getElementById('name').value;
-const lang=document.getElementById('lang').value;
-const author=document.getElementById('author').value;
-const code=document.getElementById('code').value;
+const name=nameInput.value.trim();
+const lang=langInput.value.trim();
+const author=authorInput.value.trim();
+const code=codeInput.value;
 
 if(!name||!lang||!author||!code)return alert('Preencha tudo');
 
 const id=genId();
 
-// estrutura leve
 await fetch(`${DB}/codes/${id}.json`,{
 method:'PUT',
 body:JSON.stringify({
-name,lang,author,code,
-createdAt:Date.now()
+name,lang,author,code,createdAt:Date.now()
 })
 });
+
+nameInput.value='';
+langInput.value='';
+authorInput.value='';
+codeInput.value='';
 
 load();
 }
 
+// LOAD
 async function load(){
+document.getElementById('loading').style.display='block';
+
+try{
 const res=await fetch(`${DB}/codes.json`);
 const data=await res.json();
 
-const list=document.getElementById('list');
+if(!data){
+list.innerHTML='<p style="color:#888">Nenhum código ainda</p>';
+return;
+}
+
+allCodes = Object.entries(data)
+.map(([id,c])=>({id,...c}))
+.sort((a,b)=>b.createdAt-a.createdAt);
+
+render(allCodes);
+
+}catch(e){
+console.error(e);
+}finally{
+document.getElementById('loading').style.display='none';
+}
+}
+
+// RENDER
+function render(codes){
 list.innerHTML='';
 
-if(!data)return;
-
-Object.entries(data).reverse().forEach(([id,c])=>{
+codes.forEach(c=>{
 const div=document.createElement('div');
 div.className='card';
+
 div.innerHTML=`
-<div class="title">${c.name}</div>
-<div class="meta">${c.lang} • por ${c.author}</div>
+<div class="title">${escapeHTML(c.name)}</div>
+<div class="meta">${escapeHTML(c.lang)} • por ${escapeHTML(c.author)}</div>
 `;
 
 div.onclick=()=>openModal(c);
@@ -137,17 +214,89 @@ list.appendChild(div);
 });
 }
 
-function openModal(c){
-document.getElementById('modal').style.display='flex';
-document.getElementById('m-title').textContent=c.name;
-document.getElementById('m-meta').textContent=c.lang+' • '+c.author;
-document.getElementById('m-code').textContent=c.code;
+// 🔍 FILTRO
+function filterList(){
+const term = search.value.trim().toLowerCase();
+
+// se vazio → mostra tudo
+if(term === ""){
+render(allCodes);
+return;
 }
 
-function closeModal(){document.getElementById('modal').style.display='none'}
+const filtered = allCodes.filter(c =>
+(c.lang || "").toLowerCase().includes(term)
+);
 
+render(filtered);
+}
+
+// MODAL
+function openModal(c){
+currentCode = c;
+
+modal.style.display='flex';
+mTitle.textContent=c.name;
+mMeta.textContent=c.lang+' • '+c.author;
+mCode.textContent=c.code;
+
+// verificar autor
+const user = authorInput.value.trim();
+if(user && user === c.author){
+deleteBtn.style.display='inline-block';
+}else{
+deleteBtn.style.display='none';
+}
+}
+
+function closeModal(){
+modal.style.display='none';
+}
+
+function outsideClick(e){
+if(e.target.id==='modal') closeModal();
+}
+
+// 📋 COPIAR
+function copyCode(){
+navigator.clipboard.writeText(mCode.textContent);
+alert('Código copiado!');
+}
+
+// 🗑️ DELETAR
+async function deleteCode(){
+const user = authorInput.value.trim();
+
+if(user !== currentCode.author){
+return alert('Você não pode deletar isso');
+}
+
+if(!confirm('Tem certeza que deseja deletar?')) return;
+
+await fetch(`${DB}/codes/${currentCode.id}.json`,{
+method:'DELETE'
+});
+
+closeModal();
 load();
+}
 
+// REFS
+const nameInput=document.getElementById('name');
+const langInput=document.getElementById('lang');
+const authorInput=document.getElementById('author');
+const codeInput=document.getElementById('code');
+
+const modal=document.getElementById('modal');
+const mTitle=document.getElementById('m-title');
+const mMeta=document.getElementById('m-meta');
+const mCode=document.getElementById('m-code');
+
+const search=document.getElementById('search');
+const deleteBtn=document.getElementById('deleteBtn');
+
+// INIT
+load();
 </script>
 
 </body>
