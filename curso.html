@@ -30,7 +30,6 @@ grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
 gap:1.5rem;
 }
 
-/* 🔥 CARD CATALOGO */
 .card{
 position:relative;
 background:#111;
@@ -121,26 +120,13 @@ cursor:pointer;
 <!-- CURSOS -->
 <div id="courses" class="container">
 <button class="back" onclick="goIndex()">⬅ Voltar</button>
-
 <h1>Catálogo</h1>
-
-<div class="grid">
-
-<div class="card" onclick="openCourse('curso1')">
-<img src="https://img.youtube.com/vi/mo3fpbW_eTA/hqdefault.jpg">
-<div class="card-content">
-<h3>JavaScript Completo</h3>
-<p>Sintaxe Básica</p>
-</div>
-</div>
-
-</div>
+<div class="grid"></div>
 </div>
 
 <!-- MODULOS -->
 <div id="modules" class="container" style="display:none">
 <button class="back" onclick="showCourses()">⬅ Voltar</button>
-
 <h1>Módulo</h1>
 <div id="moduleList" class="grid"></div>
 </div>
@@ -148,7 +134,6 @@ cursor:pointer;
 <!-- DASHBOARD -->
 <div id="dashboard" class="container" style="display:none">
 <button class="back" onclick="showCourses()">⬅ Voltar</button>
-
 <h1>Progresso</h1>
 <div id="progressList" class="grid"></div>
 </div>
@@ -165,145 +150,168 @@ cursor:pointer;
 let player;
 let currentCourse, currentLesson;
 let interval, lastSaved = 0;
+let coursesData = [];
 
-// 🔥 1 aula
-const courses = {
-  curso1: [
-    { id:'a1', title:'Sintaxe Básica', video:'mo3fpbW_eTA' }
-  ]
-};
+// carregar JSON
+async function loadCourses(){
+  const res = await fetch('courses.json');
+  const data = await res.json();
+  coursesData = data.courses;
+  renderCourses();
+}
 
-// 🔥 voltar pro index.html
+// render catálogo
+function renderCourses(){
+  const grid = document.querySelector('#courses .grid');
+  grid.innerHTML = '';
+
+  coursesData.forEach(course=>{
+    grid.innerHTML += `
+      <div class="card" onclick="openCourse('${course.id}')">
+        <img src="${course.thumbnail}">
+        <div class="card-content">
+          <h3>${course.title}</h3>
+          <p>${course.description}</p>
+        </div>
+      </div>
+    `;
+  });
+}
+
 function goIndex(){
-window.location.href = "index.html";
+  window.location.href = "index.html";
 }
 
 function showCourses(){
-document.getElementById('courses').style.display='block';
-document.getElementById('modules').style.display='none';
-document.getElementById('dashboard').style.display='none';
+  document.getElementById('courses').style.display='block';
+  document.getElementById('modules').style.display='none';
+  document.getElementById('dashboard').style.display='none';
 }
 
+// abrir curso
 function openCourse(id){
-currentCourse = id;
+  currentCourse = coursesData.find(c=>c.id===id);
 
-document.getElementById('courses').style.display='none';
-document.getElementById('modules').style.display='block';
+  document.getElementById('courses').style.display='none';
+  document.getElementById('modules').style.display='block';
 
-const list = document.getElementById('moduleList');
-list.innerHTML = '';
+  const list = document.getElementById('moduleList');
+  list.innerHTML = '';
 
-courses[id].forEach(l => {
-list.innerHTML += `
-<div class="card">
-<div class="card-content">
-<h3>${l.title}</h3>
-<button onclick="openLesson('${l.id}')">Assistir</button>
-</div>
-</div>
-`;
-});
+  currentCourse.lessons.forEach(l=>{
+    list.innerHTML += `
+      <div class="card">
+        <div class="card-content">
+          <h3>${l.title}</h3>
+          <button onclick="openLesson('${l.id}')">Assistir</button>
+        </div>
+      </div>
+    `;
+  });
 }
 
+// abrir aula
 function openLesson(id){
-currentLesson = id;
-const lesson = courses[currentCourse].find(x=>x.id===id);
+  currentLesson = currentCourse.lessons.find(x=>x.id===id);
 
-document.getElementById('player').style.display='block';
+  document.getElementById('player').style.display='block';
 
-if(player){
-player.loadVideoById(lesson.video);
-}else{
-player = new YT.Player('yt',{
-videoId: lesson.video,
-events:{ onReady: onReady }
-});
-}
+  if(player){
+    player.loadVideoById(currentLesson.video);
+  }else{
+    player = new YT.Player('yt',{
+      videoId: currentLesson.video,
+      events:{ onReady: onReady }
+    });
+  }
 }
 
 function onReady(){
-resume();
-
-clearInterval(interval);
-
-interval = setInterval(saveProgress, 3000);
+  resume();
+  clearInterval(interval);
+  interval = setInterval(saveProgress, 3000);
 }
 
+// salvar progresso
 function saveProgress(){
-if(!player) return;
+  if(!player) return;
 
-const current = player.getCurrentTime();
-const duration = player.getDuration();
-if(!duration) return;
+  const current = player.getCurrentTime();
+  const duration = player.getDuration();
+  if(!duration) return;
 
-const percent = (current/duration)*100;
+  const percent = (current/duration)*100;
 
-if(Math.abs(percent - lastSaved) > 5){
-lastSaved = percent;
+  if(Math.abs(percent - lastSaved) > 5){
+    lastSaved = percent;
 
-localStorage.setItem(
-`progress_${currentCourse}_${currentLesson}`,
-JSON.stringify({
-time: current,
-progress: percent
-})
-);
+    localStorage.setItem(
+      `progress_${currentCourse.id}_${currentLesson.id}`,
+      JSON.stringify({
+        time: current,
+        progress: percent
+      })
+    );
+  }
 }
-}
 
+// retomar
 function resume(){
-const data = JSON.parse(
-localStorage.getItem(`progress_${currentCourse}_${currentLesson}`)
-);
+  const data = JSON.parse(
+    localStorage.getItem(`progress_${currentCourse.id}_${currentLesson.id}`)
+  );
 
-if(data && player){
-player.seekTo(data.time || 0);
-}
+  if(data && player){
+    player.seekTo(data.time || 0);
+  }
 }
 
+// fechar player
 function closePlayer(){
-document.getElementById('player').style.display='none';
-
-// 🔥 parar vídeo
-if(player){
-player.stopVideo();
-}
+  document.getElementById('player').style.display='none';
+  if(player){
+    player.stopVideo();
+  }
 }
 
+// dashboard
 function loadDashboard(){
-document.getElementById('courses').style.display='none';
-document.getElementById('modules').style.display='none';
-document.getElementById('dashboard').style.display='block';
+  document.getElementById('courses').style.display='none';
+  document.getElementById('modules').style.display='none';
+  document.getElementById('dashboard').style.display='block';
 
-const container = document.getElementById('progressList');
-container.innerHTML = '';
+  const container = document.getElementById('progressList');
+  container.innerHTML = '';
 
-for(let c in courses){
-let total = 0, count = 0;
+  coursesData.forEach(c=>{
+    let total = 0, count = 0;
 
-courses[c].forEach(l=>{
-const data = JSON.parse(localStorage.getItem(`progress_${c}_${l.id}`));
-if(data){
-total += data.progress;
-count++;
+    c.lessons.forEach(l=>{
+      const data = JSON.parse(localStorage.getItem(`progress_${c.id}_${l.id}`));
+      if(data){
+        total += data.progress;
+        count++;
+      }
+    });
+
+    const avg = count ? Math.floor(total/count) : 0;
+
+    container.innerHTML += `
+      <div class="card">
+        <div class="card-content">
+          <h3>${c.title}</h3>
+          <div class="progress">
+            <div class="progress-bar" style="width:${avg}%"></div>
+          </div>
+          <p>${avg}% completo</p>
+        </div>
+      </div>
+    `;
+  });
 }
-});
 
-const avg = count ? Math.floor(total/count) : 0;
-
-container.innerHTML += `
-<div class="card">
-<div class="card-content">
-<h3>${c}</h3>
-<div class="progress">
-<div class="progress-bar" style="width:${avg}%"></div>
-</div>
-<p>${avg}% completo</p>
-</div>
-</div>
-`;
-}
-}
+// iniciar
+loadCourses();
 </script>
 
 </body>

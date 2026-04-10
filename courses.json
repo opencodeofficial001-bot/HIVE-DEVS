@@ -1,0 +1,98 @@
+{
+  "courses": [
+    {
+      "id": "curso1",
+      "title": "JavaScript Completo",
+      "description": "Sintaxe Básica",
+      "thumbnail": "https://img.youtube.com/vi/mo3fpbW_eTA/hqdefault.jpg",
+      "lessons": [
+        {
+          "id": "a1",
+          "title": "Sintaxe Básica",
+          "video": "mo3fpbW_eTA"
+        }
+      ]
+    },
+    {
+      "id": "curso2",
+      "title": "Binario",
+      "description": "Base Binária",
+      "thumbnail": "https://img.youtube.com/vi/FRW02uGCrCA/hqdefault.jpg",
+      "lessons": [
+        {
+          "id": "b1",
+          "title": "Introdução ao Binário",
+          "video": "FRW02uGCrCA"
+        }
+      ]
+    },
+    {
+      "id": "curso3",
+      "title": "Logica de Programação com Python",
+      "description": "Aprenda a lógica da programação",
+      "thumbnail": "https://img.youtube.com/vi/9xhYJcRROp0/hqdefault.jpg",
+      "lessons": [
+        {
+          "id": "c1",
+          "title": "Aula 01: Olá, mundo!",
+          "video": "9xhYJcRROp0"
+        },
+        {
+          "id": "c2",
+          "title": "Aula 02: Entrada de dados",
+          "video": "z833fDbi2gU"
+        },
+        {
+          "id": "c3",
+          "title": "Aula 03: Variáveis",
+          "video": "BJbTQ7KlEEo"
+        },
+        {
+          "id": "c4",
+          "title": "Aula 04: Tipos de Dados",
+          "video": "NxdYJDdBwf4"
+        },
+        {
+          "id": "c5",
+          "title": "Aula 05: Tipo Booleano e Condicionais",
+          "video": "C_VpQ7ZZBgM"
+        },
+        {
+          "id": "c6",
+          "title": "Aula 06: Condições Aninhadas",
+          "video": "5ljS0eNzlIc"
+        },
+        {
+          "id": "c7",
+          "title": "Aula 07: Lógica Booleana (1/2)",
+          "video": "Hav8qzVbT8U"
+        },
+        {
+          "id": "c8",
+          "title": "Aula 08: Lógica Booleana (2/2)",
+          "video": "VXHUNgjMPQ0"
+        },
+        {
+          "id": "c9",
+          "title": "Aula 09: Listas e Iterações",
+          "video": "ZY7GIIfZohE"
+        },
+        {
+          "id": "c10",
+          "title": "Aula 10: Laços de Repetição (1/2)",
+          "video": "0Iyxig-M8Kg"
+        },
+        {
+          "id": "c11",
+          "title": "Aula 11: Laços de Repetição (2/2)",
+          "video": "rK4DShlUaA8"
+        },
+        {
+          "id": "c12",
+          "title": "Aula 12: Projeto",
+          "video": "vuWLxeao6MI"
+        }  
+      ]
+    }
+  ]
+}
